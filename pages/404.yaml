@@ -1,0 +1,28 @@
+# A 404 page for if the user navigates to a page that does not exist.
+# This page is public.
+id: '404'
+type: Context
+style:
+  minHeight: 100vh
+blocks:
+  - id: 404_result
+    type: Result
+    properties:
+      status: 404
+      title: '404'
+      subTitle: Sorry, the page you are visiting does not exist.
+    areas:
+      extra:
+        blocks:
+          - id: home
+            type: Button
+            properties:
+              title: Go to home page
+              type: Link
+              icon: HomeOutlined
+            events:
+              onClick:
+                - id: home
+                  type: Link
+                  params:
+                    home: true

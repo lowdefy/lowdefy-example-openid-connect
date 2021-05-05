@@ -1,0 +1,179 @@
+# This page is protected, so can only be accessed by logged in users.
+# Only users with the "admin" role can access this page.
+
+# This app uses a users collection in MongoDB to create a "invite-only"
+# user system using Auth0. An Auth0 login rule checks for the user email
+# in the users collection, and only authorizes users that are found in that collection.
+
+id: new-user
+type: PageHeaderMenu
+properties:
+  title: New User
+layout:
+  contentJustify: center
+
+requests:
+  # Request to insert a user object in MongoDB
+  - id: create_user
+    type: MongoDBInsertOne
+    connectionId: users
+    properties:
+      doc:
+        email:
+          _state: email
+        given_name:
+          _state: given_name
+        family_name:
+          _state: family_name
+        name:
+          _string.concat:
+            - _string.trim:
+                _state: given_name
+            - ' '
+            - _string.trim:
+                _state: family_name
+        roles:
+          _state: roles
+        picture:
+          _state: picture
+        disabled: false
+        updated_at:
+          _date: now
+        created_at:
+          _date: now
+
+events:
+  onEnter:
+    # Generate a random avatars.dicebear.com robot avatar for the user.
+    - id: set_user_picture
+      type: SetState
+      params:
+        picture:
+          _nunjucks:
+            template: https://avatars.dicebear.com/api/bottts/{{ random }}.svg
+            on:
+              random:
+                _random:
+                  type: string
+                  length: 12
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: title
+    type: Title
+    style:
+      textAlign: center
+    properties:
+      content: New User
+      level: 2
+  - id: content_card
+    type: Card
+    layout:
+      size: 600
+      contentGutter: 16
+      contentJustify: center
+    blocks:
+      - id: avatar_box
+        type: Box
+        layout:
+          size: 120
+          contentGutter: 24
+        blocks:
+          - id: avatar
+            type: Avatar
+            layout:
+              size: auto
+            properties:
+              size: 120
+              src:
+                _state: picture
+              alt:
+                _user: name
+          - id: new_avatar
+            type: Button
+            properties:
+              icon: SyncOutlined
+              shape: round
+              size: small
+              type: default
+              title: New Avatar
+        events:
+          onClick:
+            # Generate a new picture URL.
+            - id: new_avatar_scr
+              type: SetState
+              params:
+                picture:
+                  _nunjucks:
+                    template: https://avatars.dicebear.com/api/bottts/{{ random }}.svg
+                    on:
+                      random:
+                        _random:
+                          type: string
+                          length: 12
+      - id: email
+        type: TextInput
+        required: true
+        properties:
+          title: Email
+        # Validate the email address
+        # Give both a warning and a validation error on this check.
+        validate:
+          - message: Please provide a valid email address.
+            status: warning
+            pass:
+              _regex: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+          - message: Please provide a valid email address.
+            status: error
+            pass:
+              _regex: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+      - id: given_name
+        type: TextInput
+        required: true
+        properties:
+          title: First Name
+      - id: family_name
+        type: TextInput
+        required: true
+        properties:
+          title: Last Name
+      - id: roles
+        type: MultipleSelector
+        properties:
+          title: Roles
+          options:
+            - admin
+      - id: save_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Save
+          icon: SaveOutlined
+          block: true
+        events:
+          onClick:
+            # Insert user and return to users page
+            - id: create_user
+              type: Request
+              params: create_user
+            - id: return_to_users
+              type: Link
+              params: users
+      - id: cancel_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Cancel
+          icon: CloseCircleOutlined
+          type: default
+          block: true
+        events:
+          onClick:
+            # Return to users page
+            - id: return_to_users
+              type: Link
+              params: users

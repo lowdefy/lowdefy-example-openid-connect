@@ -1,0 +1,87 @@
+
+lowdefy: 3.14.1
+name: Lowdefy OpenID Connect Example
+licence: MIT
+
+config:
+  # Always direct users to the login page, which will redirect them to the correct page.
+  homePageId: login
+  auth:
+    openId:
+      # Field in the OpenID Connect idToken that contains the user's roles
+      # This is added as a custom claim in the Auth0 login rule
+      # It must be prefixed with a "namespace", which should be a URL, else it is
+      # not included by Auth0.
+      rolesField: https://example.com/roles
+      # Logout redirect URI for Auth0
+      logoutRedirectUri: '{{ openid_domain }}/v2/logout?returnTo={{ host }}/logged-out&client_id={{ client_id }}&id_token_hint={{ id_token_hint }}'
+    pages:
+      # All pages in the app can be seen only by logged in users
+      protected: true
+      # except for the following pages:
+      public:
+        - login
+        - logged-out
+        - '404'
+        - public-page
+      roles:
+        # Additionally, only users with the "admin" role can see the following pages:
+        # Comment out this config if you have not set up roles in the OpenID Connect provider.
+        admin:
+          - users
+          - new-user
+          - edit-user
+
+# Use the AgGridAlpine custom block
+types:
+  AgGridAlpine:
+    url: https://blocks-cdn.lowdefy.com/v3.12.3/blocks-aggrid/meta/AgGridAlpine.json
+
+connections:
+  # MongoDB collection to store user data
+  # This collection is also used by the Auth0 login rule to create an "invite-only" user system
+  # Only users in the database are authorized by Auth0
+  - id: users
+    type: MongoDBCollection
+    properties:
+      collection: users
+      databaseUri:
+        _secret: MONGODB_URI
+      write: true
+
+menus:
+  # Menus are filtered, so users only see the menu links to pages they are authorized to view.
+  - id: default
+    links:
+      - id: protected-page
+        type: MenuLink
+        pageId: protected-page
+        properties:
+          icon: BankOutlined
+          title: Protected
+      - id: public-page
+        type: MenuLink
+        pageId: public-page
+        properties:
+          icon: GlobalOutlined
+          title: Public
+      - id: users
+        type: MenuLink
+        pageId: users
+        properties:
+          icon: TeamOutlined
+          title: Users
+
+pages:
+  - _ref: pages/404.yaml
+  - _ref: pages/edit-profile.yaml
+  - _ref: pages/edit-user.yaml
+  - _ref: pages/logged-out.yaml
+  - _ref: pages/login.yaml
+  - _ref: pages/new-user.yaml
+  - _ref: pages/profile.yaml
+  - _ref: pages/public-page.yaml
+  - _ref: pages/protected-page.yaml
+  - _ref: pages/users.yaml
+
+

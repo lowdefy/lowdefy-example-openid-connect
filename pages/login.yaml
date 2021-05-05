@@ -1,0 +1,33 @@
+# This page is public
+# If the user is logged in, this page will redirect to the "protected-page" page.
+# If the user is not logged in, it will call the Login action, which redirects the user
+# to the OpenID Connect provider's login page.
+id: login
+type: Context
+layout:
+  contentGutter: 16
+  contentJustify: center
+properties:
+  title: Login
+events:
+  onEnter:
+    # Redirect to "protected-page" if user is already logged in.
+    - id: logged_in_redirect
+      type: Link
+      skip:
+        _eq:
+          - _user: sub
+          - null
+      params: protected-page
+    # Call the Login action to log the user in.
+    - id: login
+      type: Login
+      skip:
+        _ne:
+          - _user: sub
+          - null
+      params:
+        # Redirect to "protected-page" after login is complete.
+        pageId: protected-page
+
+

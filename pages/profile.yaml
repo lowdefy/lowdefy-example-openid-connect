@@ -1,0 +1,88 @@
+# This page is protected, so can only be accessed by logged in users.
+# You don't need a role to view this page.
+id: profile
+type: PageHeaderMenu
+properties:
+  title: Profile
+  # Prefetch the "edit-profile" page, since it is likely that the user will navigate there.
+  prefetchPages:
+    - edit-profile
+layout:
+  contentJustify: center
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: title
+    type: Title
+    style:
+      textAlign: center
+    properties:
+      content: Profile
+      level: 2
+  - id: content_card
+    type: Card
+    layout:
+      size: 600
+      contentGutter: 16
+      contentJustify: center
+    blocks:
+      # Display all the user details.
+      - id: avatar
+        type: Avatar
+        layout:
+          size: auto
+        properties:
+          size: 120
+          src:
+            _user: picture
+          alt:
+            _user: name
+      - id: details
+        type: Descriptions
+        properties:
+          column: 1
+          items:
+            - label: Email
+              value:
+                _user: email
+            - label: First Name
+              value:
+                _user: given_name
+            - label: Last Name
+              value:
+                _user: family_name
+      # A button to link to the "edit-profile" page.
+      - id: edit_profile_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Edit Profile
+          icon: EditOutlined
+          block: true
+        events:
+          onClick:
+            - id: edit_profile_link
+              type: Link
+              params: edit-profile
+      # A button to call the "Logout" action.
+      # The "Logout" action will clear the user data and authorization cookie in the lowdefy app,
+      # and then redirect to the URL specified at "config.auth.openId.logoutRedirectUri"
+      # in the Lowdefy configuration.
+      # This URL is configured to be the logout URL for Auth0, which will logout the user from Auth0, and then to redirect the user back to the "logged-out" Lowdefy app after logging out.
+      - id: logout_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Logout
+          icon: LogoutOutlined
+          type: default
+          block: true
+        events:
+          onClick:
+            - id: logout
+              type: Logout
+

@@ -1,0 +1,58 @@
+# This page is public.
+# Users are redirected to this page after they have been logged out from Auth0.
+# This is configured at "config.auth.openId.logoutRedirectUri" in the Lowdefy configuration,
+# This page needs to be configured as an "Allowed Logout URL" in the Auth0 application.
+# Alternatively, the could be redirected to the Lowdefy "login" page, which will redirect them back to the
+# Auth0 login page.
+id: logged-out
+type: Context
+layout:
+  contentGutter: 16
+  contentJustify: center
+properties:
+  title: Logged Out
+events:
+  onEnter:
+    #
+    - id: logged_in_redirect
+      type: Link
+      skip:
+        _eq:
+          - _user: sub
+          - null
+      params: protected-page
+blocks:
+  - id: box
+    type: Box
+    layout:
+      contentAlign: center
+      contentGutter: 20
+      size: 800
+    style:
+      margin: 100px 20px
+    blocks:
+      - id: logo
+        type: Html
+        style:
+          textAlign: center
+        properties:
+          html: |
+            <img style="width: 80%; max-width: 250px;" src="/public/logo-light-theme.png" alt="Logo"/>
+      - id: login_button
+        type: Button
+        style:
+          margin: 40px
+          maxWidth: 300
+        properties:
+          title: Login
+          icon: LoginOutlined
+          size: large
+          block: true
+          shape: round
+          type: primary
+        events:
+          onClick:
+            - id: login
+              type: Login
+              params:
+                pageId: protected-page

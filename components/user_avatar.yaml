@@ -1,0 +1,65 @@
+# The user avatar allows users to login, logout, and view and edit their profile.
+id: user_avatar
+type: Box
+blocks:
+  # Show a login button if the user is not logged in.
+  - id: user_avatar_login_button
+    type: Button
+    visible:
+      _eq:
+        - _user: sub
+        - null
+    properties:
+      type: default
+      shape: round
+      title: Login
+      icon: LoginOutlined
+    events:
+      onClick:
+        - id: login
+          type: Login
+  # Show the user name and avatar if the user is logged in.
+  # Clicking on this Box will link to the "profile" page.
+  - id: user_profile_link
+    type: Box
+    visible:
+      _ne:
+        - _user: sub
+        - null
+    layout:
+      contentGutter: 8
+      contentAlign: middle
+    style:
+      marginTop: 8
+    events:
+      onClick:
+        - id: link_to_profile
+          type: Link
+          params: profile
+    blocks:
+      - id: user_name
+        type: Html
+        layout:
+          flex: 0 1 auto
+        # Only show the name if the screen width is greater that 992px
+        visible:
+          _gt:
+            - _media: width
+            - 992
+        style:
+          color: white
+        properties:
+          html:
+            # Show the user name using the "name" claim on the user object/OpenID Connect ID token.
+            _user: name
+        # Show the user avatar using the "picture" claim on the user object/OpenID Connect ID token.
+      - id: user_avatar
+        type: Avatar
+        layout:
+          flex: 0 1 auto
+        properties:
+          size: large
+          src:
+            _user: picture
+          alt:
+            _user: name

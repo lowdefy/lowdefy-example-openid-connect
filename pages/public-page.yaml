@@ -1,0 +1,16 @@
+# This page is public, so can be accessed by anybody.
+# The home page will redirect to the OpenID Connect login page, so navigate directly to this page to view it while not logged in.
+id: public-page
+type: PageHeaderMenu
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: result
+    type: Result
+    properties:
+      icon:
+        name: GlobalOutlined
+      title: Public
+      subTitle: This page is a public page.

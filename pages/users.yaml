@@ -1,0 +1,130 @@
+# This page is protected, so can only be accessed by logged in users.
+# Only users with the "admin" role can access this page.
+# This page shows a table of all users in the app, and allows the user to create and edit users.
+id: users
+type: PageHeaderMenu
+properties:
+  title: Users
+  # Prefetch the "edit-user" and "new-user" pages, since it is likely that the user will navigate to them.
+  prefetchPages:
+    - edit-user
+    - new-user
+layout:
+  contentJustify: center
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+
+events:
+  onEnterAsync:
+    # Fetch all users
+    # This is done in onEnterAsync instead of onInitAsync to update the users table
+    # after linking back from the new or edit pages.
+    - id: get_users
+      type: Request
+      params: get_users
+
+requests:
+  # MongoDBAggregation request to fetch all users
+  - id: get_users
+    type: MongoDBAggregation
+    connectionId: users
+    properties:
+      pipeline:
+        - $project:
+            email: 1
+            given_name: 1
+            family_name: 1
+            roles: 1
+            # Create an active field to show if user is disabled in the users table.
+            active:
+              $cond:
+                - $disabled
+                - ⛔️
+                - ✅
+            created_at:
+              # Format dates for the table.
+              $dateToString:
+                date: $created_at
+                format: '%Y/%m/%d'
+            updated_at:
+              $dateToString:
+                date: $updated_at
+                format: '%Y/%m/%d'
+        - $sort:
+            email: 1
+
+
+blocks:
+  - id: max_width_box
+    type: Box
+    layout:
+      size: 1200
+    blocks:
+      - id: title
+        type: Title
+        layout:
+          flex: 1 1 auto
+        properties:
+          content: Users
+          level: 2
+      - id: new_user_button
+        type: Button
+        layout:
+          flex: 0 1 auto
+        properties:
+          title: New User
+          icon: PlusOutlined
+        events:
+          onClick:
+            # Link to "new-user" page.
+            - id: link_to_new_user
+              type: Link
+              params: new-user
+      - id: content_card
+        type: Card
+        blocks:
+          # Use a AgGridAlpine custom block for the users table.
+          - id: users_table
+            type: AgGridAlpine
+            properties:
+              rowData:
+                _request: get_users
+              defaultColDef:
+                sortable: true
+                resizable: true
+                filter: true
+              columnDefs:
+                - headerName: Email
+                  field: email
+                  width: 200
+                - headerName: First name
+                  field: given_name
+                  width: 150
+                - headerName: Last name
+                  field: family_name
+                  width: 150
+                - headerName: Roles
+                  field: roles
+                  width: 200
+                - headerName: Active
+                  field: active
+                  width: 100
+                - headerName: Created at
+                  field: created_at
+                  width: 150
+                - headerName: Updated at
+                  field: updated_at
+                  width: 150
+            events:
+              onRowClick:
+                # Link to "edit-user" page if a row is clicked
+                # Set the user _id to the input object
+                - id: link_to_edit
+                  type: Link
+                  params:
+                    pageId: edit-user
+                    input:
+                      user_id:
+                        _event: row._id

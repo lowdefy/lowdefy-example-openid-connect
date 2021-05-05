@@ -1,0 +1,171 @@
+# This page is protected, so can only be accessed by logged in users.
+# Only users with the "admin" role can access this page.
+id: edit-user
+type: PageHeaderMenu
+properties:
+  title: Edit User
+layout:
+  contentJustify: center
+
+events:
+  onEnter:
+    # Redirect back to the users page if no user is selected
+    # This normally happens if the "edit-user" page is refreshed.
+    - id: redirect
+      type: Link
+      skip:
+        _not:
+          _eq:
+            - _input: user_id
+            - null
+      params: users
+    # Fetch the user data from MongoDB
+    - id: get_user
+      type: Request
+      skip:
+        _eq:
+          - _input: user_id
+          - null
+      params: get_user
+    # Set the user data to state to populate the input block values.
+    - id: set_user
+      type: SetState
+      skip:
+        _eq:
+          - _input: user_id
+          - null
+      params:
+        _request: get_user
+
+requests:
+  # Request to fetch the user.
+  - id: get_user
+    type: MongoDBFindOne
+    connectionId: users
+    properties:
+      query:
+        _id:
+          _input: user_id
+      options:
+        # Only fetch the necessary data
+        projection:
+          disabled: 1
+          email: 1
+          family_name: 1
+          given_name: 1
+          name: 1
+          picture: 1
+          roles: 1
+  # MongoDBUpdateOne request to update the user.
+  - id: update_user
+    type: MongoDBUpdateOne
+    connectionId: users
+    properties:
+      filter:
+        _id:
+          _state: _id
+      update:
+        $set:
+          given_name:
+            _state: given_name
+          family_name:
+            _state: family_name
+          name:
+            _string.concat:
+              - _state: given_name
+              - ' '
+              - _state: family_name
+          roles:
+            _state: roles
+          disabled:
+            _state: disabled
+          updated_at:
+            _date: now
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: title
+    type: Title
+    style:
+      textAlign: center
+    properties:
+      content: Edit User
+      level: 2
+  - id: content_card
+    type: Card
+    layout:
+      size: 600
+      contentGutter: 16
+      contentJustify: center
+    blocks:
+      - id: avatar
+        type: Avatar
+        layout:
+          size: auto
+        properties:
+          size: 120
+          src:
+            _state: picture
+          alt:
+            _state: name
+      - id: email
+        type: TextInput
+        properties:
+          # This app does not allow user emails to be edited, since user emails are checked
+          # to only allow invited users to access the app.
+          disabled: true
+          title: Email
+      - id: given_name
+        type: TextInput
+        properties:
+          title: First Name
+      - id: family_name
+        type: TextInput
+        properties:
+          title: Last Name
+      - id: roles
+        type: MultipleSelector
+        properties:
+          title: Roles
+          options:
+            - admin
+      # If the user is disabled, they will not be allowed to access the app.
+      - id: disabled
+        type: Switch
+        properties:
+          title: Disabled
+          color: '#f5222d'
+      - id: save_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Save
+          icon: SaveOutlined
+          block: true
+        events:
+          onClick:
+            # Call the "update_user" request and return to the "users" page.
+            - id: update_user
+              type: Request
+              params: update_user
+            - id: return_to_users
+              type: Link
+              params: users
+      - id: cancel_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Cancel
+          icon: CloseCircleOutlined
+          type: default
+          block: true
+        events:
+          onClick:
+            # Return to the users page.
+            - id: return_to_users
+              type: Link
+              params: users

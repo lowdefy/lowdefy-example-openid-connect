@@ -1,0 +1,16 @@
+# This page is protected, so can only be accessed by logged in users.
+# You don't need a role to view this page.
+id: protected-page
+type: PageHeaderMenu
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: result
+    type: Result
+    properties:
+      icon:
+        name: BankOutlined
+      title: Protected
+      subTitle: This page is a protected page.

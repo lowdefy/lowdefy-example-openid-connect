@@ -1,0 +1,158 @@
+# This page is protected, so can only be accessed by logged in users.
+# You don't need a role to view this page.
+id: edit-profile
+type: PageHeaderMenu
+properties:
+  title: Edit Profile
+layout:
+  contentJustify: center
+
+events:
+  onInit:
+    # Initialize the page state with the existing user name and picture.
+    - id: init
+      type: SetState
+      params:
+        given_name:
+          _user: given_name
+        family_name:
+          _user: family_name
+        picture:
+          _user: picture
+
+requests:
+  # MongoDBUpdateOne to update the user profile in MongoDB
+  - id: update_profile
+    type: MongoDBUpdateOne
+    connectionId: users
+    properties:
+      # Match the user in the database by the user "sub" (OpenID Connect user id) claim.
+      filter:
+        sub:
+          _user: sub
+      update:
+        $set:
+          # Only allow the user to update the following fields:
+          given_name:
+            _state: given_name
+          family_name:
+            _state: family_name
+          name:
+            # Concat the given_name and family_name to for the user name
+            _string.concat:
+              - _state: given_name
+              - ' '
+              - _state: family_name
+          picture:
+            _state: picture
+          updated_at:
+            _date: now
+
+areas:
+  header:
+    blocks:
+      - _ref: components/user_avatar.yaml
+blocks:
+  - id: title
+    type: Title
+    style:
+      textAlign: center
+    properties:
+      content: Edit Profile
+      level: 2
+  - id: content_card
+    type: Card
+    layout:
+      size: 600
+      contentGutter: 16
+      contentJustify: center
+    blocks:
+      - id: avatar_box
+        type: Box
+        layout:
+          size: 120
+          contentGutter: 24
+        blocks:
+          - id: avatar
+            type: Avatar
+            layout:
+              size: auto
+            properties:
+              size: 120
+              src:
+                _state: picture
+              alt:
+                _user: name
+          - id: new_avatar
+            type: Button
+            properties:
+              icon: SyncOutlined
+              shape: round
+              size: small
+              type: default
+              title: New Avatar
+        events:
+          onClick:
+            # This app uses avatars.dicebear.com user avatars, so profile pictures don't need to
+            # be uploaded and stored.
+            # When the new avatar button is clicked, a new random avatar url is generated and set to state
+            # This is then saved when the profile is saved.
+            - id: new_avatar_scr
+              type: SetState
+              params:
+                picture:
+                  _nunjucks:
+                    template: https://avatars.dicebear.com/api/bottts/{{ random }}.svg
+                    on:
+                      random:
+                        _random:
+                          type: string
+                          length: 12
+      # Form blocks to allow the user to edit their name
+      - id: given_name
+        type: TextInput
+        required: true
+        properties:
+          title: First Name
+      - id: family_name
+        type: TextInput
+        required: true
+        properties:
+          title: Last Name
+      - id: save_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Save
+          icon: SaveOutlined
+          block: true
+        events:
+          onClick:
+            # This action updates the user profile in MongoDB
+            - id: update_profile_mongodb
+              type: Request
+              params: update_profile
+            # This action logs the user in again.
+            # This updates the user OpenID Connect token using the new data that has just been saved,
+            # which then updates the "user" object in Lowdefy.
+            - id: update_user_id_token
+              type: Login
+              params:
+                # Redirect
+                pageId: profile
+      - id: cancel_button
+        type: Button
+        layout:
+          span: 12
+        properties:
+          title: Cancel
+          icon: CloseCircleOutlined
+          type: default
+          block: true
+        events:
+          onClick:
+            # The cancel button just links back to the profile page.
+            - id: return_to_profile
+              type: Link
+              params: profile
