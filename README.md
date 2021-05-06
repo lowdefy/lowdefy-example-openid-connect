@@ -2,7 +2,7 @@
 
 This example shows how to implement OpenID Connect user authentication in Lowdefy, and how to use role based authorization.
 
-Auth0 is used as a OpenId Connect provider, and a MongoDB database and Auth0 login rule are used to create a "invite only" authentication service, where only users that have been added by an administrator are allowed to access the app.
+Auth0 is used as a OpenId Connect provider, and a MongoDB database and an Auth0 login rule is used to create an "invite only" authentication service, where only users that have been added by an administrator are allowed to access the app.
 
 This app has a public page, that can be accessed by anybody, as well as a protected page, that can only be accessed by logged in users. It also has profile and edit profile pages, that users can access to view and edit their profile. It also has user admin pages, that allow users with the "admin" role to view, create and edit users.
 
@@ -54,7 +54,7 @@ You will need the "Domain", "Client ID", and "Client Secret" from the basic info
 
 ##### Step 9 - Create a JSON web token secret
 
-You will need to create a JSON web token secret. Your app will use this to sign the tokens used to authorize users. You run the following command in the command console to generate the key:
+You will need to create a JSON web token secret. Your app will use this to sign the tokens used to authorize users. You can run the following command in the command console to generate the key:
 ```
 node -e "console.log(require('crypto').randomBytes(256).toString('base64'));"
 ```
