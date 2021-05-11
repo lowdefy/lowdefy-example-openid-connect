@@ -14,7 +14,7 @@ config:
       # not included by Auth0.
       rolesField: https://example.com/roles
       # Logout redirect URI for Auth0
-      logoutRedirectUri: '{{ openid_domain }}/v2/logout?returnTo={{ host }}/logged-out&client_id={{ client_id }}&id_token_hint={{ id_token_hint }}'
+      logoutRedirectUri: '{{ openid_domain }}/v2/logout?returnTo={{ host }}/logged-out&client_id={{ client_id }}'
     pages:
       # All pages in the app can be seen only by logged in users
       protected: true
