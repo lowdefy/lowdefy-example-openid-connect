@@ -1,6 +1,6 @@
 # Lowdefy OpenID Connect Example
 
-This example shows how to implement OpenID Connect user authentication in Lowdefy, and how to use role based authorization.
+This example shows how to implement OpenID Connect user authentication and authorization in Lowdefy, and how to use role based authorization. More information on user authentication and authorization can be found in the [Lowdefy docs](https://docs.lowdefy.com/users-introduction).
 
 Auth0 is used as a OpenId Connect provider, and a MongoDB database and an Auth0 login rule is used to create an "invite only" authentication service, where only users that have been added by an administrator are allowed to access the app.
 
@@ -54,7 +54,7 @@ You will need the "Domain", "Client ID", and "Client Secret" from the basic info
 
 ##### Step 9 - Create a JSON web token secret
 
-You will need to create a JSON web token secret. Your app will use this to sign the tokens used to authorize users. You can run the following command in the command console to generate the key:
+You will need to create a JSON web token secret. This secret should be a long randomly generated string. Your app will use this to sign the tokens used to authorize users. You can run the following command in the command console to generate the key:
 ```
 node -e "console.log(require('crypto').randomBytes(256).toString('base64'));"
 ```
@@ -71,6 +71,8 @@ LOWDEFY_SECRET_OPENID_CLIENT_SECRET = YOUR_AUTHO_CLIENT_SECRET
 LOWDEFY_SECRET_OPENID_DOMAIN = YOUR_AUTHO_DOMAIN
 LOWDEFY_SECRET_JWT_SECRET = YOUR_SECRET_KEY
 ```
+
+The `LOWDEFY_SECRET_OPENID_DOMAIN` should contain the `https://` URL protocol prefix.
 
 ##### Step 10 - Run the app
 
