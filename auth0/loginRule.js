@@ -15,7 +15,7 @@ async function loginRule(user, context, callback) {
     // The MongoDB connection is memoized in global, so it can be reused.
     // If it does not exist, it is created and stored.
     if (!global.userCollection) {
-      const client = new MongoClient(configuration.BWE_MDB_URI, {
+      const client = new MongoClient(configuration.MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
