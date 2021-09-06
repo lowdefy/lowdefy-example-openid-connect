@@ -1,5 +1,4 @@
-
-lowdefy: 3.15.0
+lowdefy: 3.21.2
 name: Lowdefy OpenID Connect Example
 licence: MIT
 
@@ -83,5 +82,3 @@ pages:
   - _ref: pages/public-page.yaml
   - _ref: pages/protected-page.yaml
   - _ref: pages/users.yaml
-
-
